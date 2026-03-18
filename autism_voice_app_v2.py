@@ -191,41 +191,40 @@ def speak_phrase(phrase: str):
     speak_text(phrase)
 
 
-def render_jayden_bike_intro(avatar_base64: str | None):
+def render_jayden_bike_intro(avatar_base64=None):
     if avatar_base64:
-        avatar_html = f"""
-        <div class="jayden-avatar-wrap">
-            <img src="data:image/png;base64,{avatar_base64}" class="jayden-avatar" />
-            <div class="jayden-wave">👋</div>
-        </div>
-        """
+        avatar_html = (
+            f'<div class="jayden-avatar-wrap">'
+            f'  <img src="data:image/png;base64,{avatar_base64}" class="jayden-avatar" />'
+            f'  <div class="jayden-wave">👋</div>'
+            f'</div>'
+        )
     else:
-        avatar_html = """
-        <div class="jayden-avatar-wrap">
-            <div class="jayden-avatar jayden-fallback-avatar">🎈</div>
-            <div class="jayden-wave">👋</div>
-        </div>
-        """
+        avatar_html = (
+            '<div class="jayden-avatar-wrap">'
+            '  <div class="jayden-avatar jayden-fallback-avatar">🎈</div>'
+            '  <div class="jayden-wave">👋</div>'
+            '</div>'
+        )
 
-    st.markdown(
-        f"""
-        <div class="jayden-stage">
-            <div class="jayden-ground"></div>
-            <div class="jayden-rider">
-                {avatar_html}
-                <div class="bike">
-                    <div class="wheel left"></div>
-                    <div class="wheel right"></div>
-                    <div class="bike-frame">
-                        <div class="handlebar"></div>
-                        <div class="seat"></div>
-                    </div>
+    html = f"""
+    <div class="jayden-stage">
+        <div class="jayden-ground"></div>
+        <div class="jayden-rider">
+            {avatar_html}
+            <div class="bike">
+                <div class="wheel left"></div>
+                <div class="wheel right"></div>
+                <div class="bike-frame">
+                    <div class="handlebar"></div>
+                    <div class="seat"></div>
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """
+
+    st.markdown(html, unsafe_allow_html=True) 
 
 
 # --------------------------------------------------
