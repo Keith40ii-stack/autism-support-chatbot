@@ -1,227 +1,24 @@
 import os
 import time
 import json
+import base64
 import tempfile
 import streamlit as st
 import streamlit.components.v1 as components
 import speech_recognition as sr
 
-# --------------------------------------------------
-# Page config
-# --------------------------------------------------
-st.set_page_config(
-    page_title="Jayden’s Calm Journey | Autism Support Chatbot",
-    page_icon="🎈",
-    layout="centered"
-)
 
 # --------------------------------------------------
-# App Store-style UI
+# Helpers
 # --------------------------------------------------
-st.markdown("""
-<style>
-/* ---------- Global ---------- */
-.stApp {
-    background: linear-gradient(180deg, #dff3ff 0%, #edf9ff 45%, #f8fdff 100%);
-    overflow: hidden;
-    color: #163240;
-}
+def get_base64_image(image_path: str):
+    try:
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    except FileNotFoundError:
+        return None
 
-[data-testid="stHeader"] {
-    background: rgba(0,0,0,0);
-}
 
-section.main > div {
-    padding-top: 1rem;
-}
-
-/* ---------- Balloon background ---------- */
-.balloon-bg {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-}
-
-.balloon {
-    position: absolute;
-    bottom: -150px;
-    width: 74px;
-    height: 96px;
-    border-radius: 50% 50% 45% 45%;
-    opacity: 0.20;
-    animation-name: floatUp;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    filter: blur(0.2px);
-}
-
-.balloon::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 94px;
-    width: 2px;
-    height: 72px;
-    background: rgba(110, 130, 145, 0.22);
-    transform: translateX(-50%);
-}
-
-.b1 { left: 5%;  background: #8fd3ff; animation-duration: 19s; animation-delay: 0s; }
-.b2 { left: 16%; background: #ffd8e8; animation-duration: 24s; animation-delay: 3s; }
-.b3 { left: 29%; background: #ffe49f; animation-duration: 22s; animation-delay: 1s; }
-.b4 { left: 43%; background: #bde7c8; animation-duration: 25s; animation-delay: 5s; }
-.b5 { left: 58%; background: #cfc8ff; animation-duration: 20s; animation-delay: 2s; }
-.b6 { left: 74%; background: #ffcfb3; animation-duration: 26s; animation-delay: 6s; }
-.b7 { left: 89%; background: #aee6ff; animation-duration: 23s; animation-delay: 4s; }
-
-@keyframes floatUp {
-    0% {
-        transform: translateY(0) translateX(0px);
-        opacity: 0;
-    }
-    10% {
-        opacity: 0.22;
-    }
-    50% {
-        transform: translateY(-52vh) translateX(12px);
-    }
-    100% {
-        transform: translateY(-120vh) translateX(-10px);
-        opacity: 0;
-    }
-}
-
-/* ---------- Main container ---------- */
-.block-container {
-    position: relative;
-    z-index: 1;
-    max-width: 760px;
-    background: rgba(255,255,255,0.86);
-    border-radius: 30px;
-    padding: 1.4rem 1.25rem 2rem 1.25rem;
-    margin-top: 0.75rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 18px 40px rgba(43, 91, 122, 0.10);
-    backdrop-filter: blur(10px);
-}
-
-/* ---------- Typography ---------- */
-.app-brand {
-    text-align: center;
-    font-size: 2rem;
-    font-weight: 800;
-    color: #17384b;
-    margin-bottom: 0.2rem;
-    letter-spacing: -0.02em;
-}
-
-.app-subbrand {
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #4b6f82;
-    margin-bottom: 0.3rem;
-}
-
-.app-caption {
-    text-align: center;
-    color: #6a8998;
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-}
-
-.hero-card {
-    background: linear-gradient(135deg, #d8eefb 0%, #eef8ff 100%);
-    border-radius: 24px;
-    padding: 1.1rem 1rem;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
-    margin-bottom: 1rem;
-}
-
-.soft-card {
-    background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(190, 220, 235, 0.65);
-    border-radius: 22px;
-    padding: 1rem 1rem;
-    box-shadow: 0 10px 22px rgba(45, 82, 104, 0.06);
-    margin-bottom: 0.9rem;
-}
-
-.card-title {
-    font-size: 1.25rem;
-    font-weight: 750;
-    color: #1f4255;
-    margin-bottom: 0.25rem;
-}
-
-.card-text {
-    color: #5a7886;
-    line-height: 1.55;
-    font-size: 0.98rem;
-}
-
-/* ---------- Buttons ---------- */
-.stButton > button {
-    width: 100%;
-    border-radius: 18px;
-    min-height: 3.25rem;
-    font-size: 1rem;
-    font-weight: 700;
-    border: none;
-    background: linear-gradient(180deg, #d6eef9 0%, #cbe8f7 100%);
-    color: #1d3a4b;
-    box-shadow: 0 6px 14px rgba(67, 131, 168, 0.10);
-}
-
-.stButton > button:hover {
-    background: linear-gradient(180deg, #c8e8f8 0%, #bce1f4 100%);
-    color: #17384b;
-}
-
-.stButton > button:focus {
-    outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(151, 209, 239, 0.35);
-}
-
-/* ---------- Inputs ---------- */
-[data-testid="stAudioInput"] {
-    background: rgba(255,255,255,0.9);
-    border-radius: 20px;
-    padding: 0.4rem;
-}
-
-/* ---------- Alerts ---------- */
-[data-testid="stSuccess"] {
-    border-radius: 18px;
-}
-
-[data-testid="stInfo"] {
-    border-radius: 18px;
-}
-
-/* ---------- Divider space ---------- */
-hr {
-    margin-top: 1.2rem;
-    margin-bottom: 1.2rem;
-}
-</style>
-
-<div class="balloon-bg">
-    <div class="balloon b1"></div>
-    <div class="balloon b2"></div>
-    <div class="balloon b3"></div>
-    <div class="balloon b4"></div>
-    <div class="balloon b5"></div>
-    <div class="balloon b6"></div>
-    <div class="balloon b7"></div>
-</div>
-""", unsafe_allow_html=True)
-
-# --------------------------------------------------
-# Browser speech
-# --------------------------------------------------
 def speak_text(text: str):
     safe_text = json.dumps(text)
     js_code = f"""
@@ -278,9 +75,7 @@ def speak_text(text: str):
     """
     components.html(js_code, height=0)
 
-# --------------------------------------------------
-# Audio transcription
-# --------------------------------------------------
+
 def transcribe_audio(audio_file):
     try:
         recognizer = sr.Recognizer()
@@ -299,9 +94,7 @@ def transcribe_audio(audio_file):
     except Exception as e:
         return f"Error: {e}"
 
-# --------------------------------------------------
-# Intent interpretation
-# --------------------------------------------------
+
 def interpret_child_message(text: str):
     lowered = text.lower().strip()
 
@@ -374,9 +167,7 @@ def interpret_child_message(text: str):
         "response": "Thank you for telling me. I am here with you."
     }
 
-# --------------------------------------------------
-# Emotion responses
-# --------------------------------------------------
+
 def get_response(emotion: str):
     responses = {
         "happy": "I’m so glad you feel happy. That makes me smile.",
@@ -385,6 +176,218 @@ def get_response(emotion: str):
         "scared": "You are safe right now. I’m here with you. Let’s take a calm breath together."
     }
     return responses.get(emotion, "I’m here to help you. You’re doing a great job.")
+
+
+def go(screen_name: str):
+    st.session_state.screen = screen_name
+
+
+def select_emotion(emotion: str):
+    st.session_state.selected_emotion = emotion_map[emotion]
+    response = get_response(emotion.lower())
+    speak_text(response)
+    go("response")
+
+
+def speak_phrase(phrase: str):
+    st.session_state.last_spoken_phrase = phrase
+    speak_text(phrase)
+
+
+# --------------------------------------------------
+# Page config
+# --------------------------------------------------
+st.set_page_config(
+    page_title="Jayden’s Calm Journey | Autism Support Chatbot",
+    page_icon="🎈",
+    layout="centered"
+)
+
+# --------------------------------------------------
+# App Store-style UI
+# --------------------------------------------------
+st.markdown("""
+<style>
+.stApp {
+    background: linear-gradient(180deg, #dff3ff 0%, #edf9ff 45%, #f8fdff 100%);
+    overflow: hidden;
+    color: #163240;
+}
+
+[data-testid="stHeader"] {
+    background: rgba(0,0,0,0);
+}
+
+section.main > div {
+    padding-top: 1rem;
+}
+
+.balloon-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.balloon {
+    position: absolute;
+    bottom: -150px;
+    width: 74px;
+    height: 96px;
+    border-radius: 50% 50% 45% 45%;
+    opacity: 0.20;
+    animation-name: floatUp;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    filter: blur(0.2px);
+}
+
+.balloon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 94px;
+    width: 2px;
+    height: 72px;
+    background: rgba(110, 130, 145, 0.22);
+    transform: translateX(-50%);
+}
+
+.b1 { left: 5%;  background: #8fd3ff; animation-duration: 19s; animation-delay: 0s; }
+.b2 { left: 16%; background: #ffd8e8; animation-duration: 24s; animation-delay: 3s; }
+.b3 { left: 29%; background: #ffe49f; animation-duration: 22s; animation-delay: 1s; }
+.b4 { left: 43%; background: #bde7c8; animation-duration: 25s; animation-delay: 5s; }
+.b5 { left: 58%; background: #cfc8ff; animation-duration: 20s; animation-delay: 2s; }
+.b6 { left: 74%; background: #ffcfb3; animation-duration: 26s; animation-delay: 6s; }
+.b7 { left: 89%; background: #aee6ff; animation-duration: 23s; animation-delay: 4s; }
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) translateX(0px);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.22;
+    }
+    50% {
+        transform: translateY(-52vh) translateX(12px);
+    }
+    100% {
+        transform: translateY(-120vh) translateX(-10px);
+        opacity: 0;
+    }
+}
+
+.block-container {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    background: rgba(255,255,255,0.86);
+    border-radius: 30px;
+    padding: 1.4rem 1.25rem 2rem 1.25rem;
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 18px 40px rgba(43, 91, 122, 0.10);
+    backdrop-filter: blur(10px);
+}
+
+.app-brand {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #17384b;
+    margin-bottom: 0.15rem;
+    letter-spacing: -0.02em;
+}
+
+.app-subbrand {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b6f82;
+    margin-bottom: 0.25rem;
+}
+
+.app-caption {
+    text-align: center;
+    color: #6a8998;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.hero-card {
+    background: linear-gradient(135deg, #d8eefb 0%, #eef8ff 100%);
+    border-radius: 24px;
+    padding: 1.1rem 1rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    margin-bottom: 1rem;
+}
+
+.soft-card {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(190, 220, 235, 0.65);
+    border-radius: 22px;
+    padding: 1rem 1rem;
+    box-shadow: 0 10px 22px rgba(45, 82, 104, 0.06);
+    margin-bottom: 0.9rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 750;
+    color: #1f4255;
+    margin-bottom: 0.25rem;
+}
+
+.card-text {
+    color: #5a7886;
+    line-height: 1.55;
+    font-size: 0.98rem;
+}
+
+.stButton > button {
+    width: 100%;
+    border-radius: 18px;
+    min-height: 3.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    background: linear-gradient(180deg, #d6eef9 0%, #cbe8f7 100%);
+    color: #1d3a4b;
+    box-shadow: 0 6px 14px rgba(67, 131, 168, 0.10);
+}
+
+.stButton > button:hover {
+    background: linear-gradient(180deg, #c8e8f8 0%, #bce1f4 100%);
+    color: #17384b;
+}
+
+.stButton > button:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(151, 209, 239, 0.35);
+}
+
+[data-testid="stAudioInput"] {
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    padding: 0.4rem;
+}
+
+[data-testid="stSuccess"],
+[data-testid="stInfo"] {
+    border-radius: 18px;
+}
+</style>
+
+<div class="balloon-bg">
+    <div class="balloon b1"></div>
+    <div class="balloon b2"></div>
+    <div class="balloon b3"></div>
+    <div class="balloon b4"></div>
+    <div class="balloon b5"></div>
+    <div class="balloon b6"></div>
+    <div class="balloon b7"></div>
+</div>
+""", unsafe_allow_html=True)
 
 # --------------------------------------------------
 # Session state
@@ -429,27 +432,41 @@ emotion_map = {
 }
 
 # --------------------------------------------------
-# Navigation helpers
+# Header with avatar
 # --------------------------------------------------
-def go(screen_name: str):
-    st.session_state.screen = screen_name
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+AVATAR_FILE = os.path.join(APP_DIR, "jayden_avatar.png")
+avatar_base64 = get_base64_image(AVATAR_FILE)
 
-def select_emotion(emotion: str):
-    st.session_state.selected_emotion = emotion_map[emotion]
-    response = get_response(emotion.lower())
-    speak_text(response)
-    go("response")
+title_col, avatar_col = st.columns([4, 1])
 
-def speak_phrase(phrase: str):
-    st.session_state.last_spoken_phrase = phrase
-    speak_text(phrase)
+with title_col:
+    st.markdown("<div class='app-brand'>🎈 Jayden’s Calm Journey</div>", unsafe_allow_html=True)
+    st.markdown("<div class='app-subbrand'>Autism Support Chatbot</div>", unsafe_allow_html=True)
 
-# --------------------------------------------------
-# Branded header
-# --------------------------------------------------
-st.markdown("<div class='app-brand'>🎈 Jayden’s Calm Journey</div>", unsafe_allow_html=True)
-st.markdown("<div class='app-subbrand'>Autism Support Chatbot</div>", unsafe_allow_html=True)
-st.markdown("<div class='app-caption'>A gentle space to help children feel calm, safe, and understood.</div>", unsafe_allow_html=True)
+with avatar_col:
+    if avatar_base64:
+        st.markdown(
+            f"""
+            <div style="display:flex; justify-content:center; align-items:center; margin-top:6px;">
+                <img src="data:image/png;base64,{avatar_base64}"
+                     style="width:95px; height:95px; object-fit:cover; border-radius:50%;
+                            border:4px solid rgba(255,255,255,0.9);
+                            box-shadow:0 8px 18px rgba(0,0,0,0.10);" />
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            "<div style='font-size:3rem; text-align:center; margin-top:8px;'>🎈</div>",
+            unsafe_allow_html=True
+        )
+
+st.markdown(
+    "<div class='app-caption'>A gentle space to help children feel calm, safe, and understood.</div>",
+    unsafe_allow_html=True
+)
 
 if st.button("🔊 Test Voice Output"):
     speak_text("Hello, friend. I am here to help you.")
@@ -638,7 +655,10 @@ elif screen == "routine":
     ]
 
     for step in steps:
-        st.markdown(f"<div class='soft-card'><div class='card-text'>{step}</div></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='soft-card'><div class='card-text'>{step}</div></div>",
+            unsafe_allow_html=True
+        )
 
     if st.button("➡ Next Step", use_container_width=True):
         st.success("Great job. Keep going.")
