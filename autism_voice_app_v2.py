@@ -10,7 +10,7 @@ import speech_recognition as sr
 # App configuration
 # -----------------------------
 st.set_page_config(
-    page_title="Autism Support Chatbot",
+    page_title= "Jayden’s Calm Journey | Autism Support Chatbot",
     page_icon="🎈",
     layout="centered"
 )
