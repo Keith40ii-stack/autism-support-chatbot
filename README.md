@@ -1,0 +1,5 @@
+Our initial launch will focus specifically on emotional regulation. The chatbot is being developed to help users recognize emotions, apply calming strategies, and navigate moments of stress or overstimulation through guided prompts, visual supports, and simple interactive conversations. The goal is to create a safe, predictable tool that reinforces coping skills in real time while supporting caregivers and educators.
+
+This first phase will emphasize core emotional regulation features such as identifying feelings, breathing and grounding exercises, visual choice-based responses, and structured routines. The design prioritizes accessibility, sensory-friendly interaction, and consistency — key elements that support individuals with autism.
+
+Following the initial release, future development phases will expand into social skills practice, communication supports, daily routines, and caregiver insights. We are approaching this project with a user-centered design mindset and plan to incorporate feedback from educators, clinicians, caregivers, and users to guide continuous improvement.
