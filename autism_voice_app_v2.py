@@ -9,9 +9,18 @@ import speech_recognition as sr
 
 
 # --------------------------------------------------
+# Page config
+# --------------------------------------------------
+st.set_page_config(
+    page_title="Jayden’s Calm Journey | Autism Support Chatbot",
+    page_icon="🎈",
+    layout="centered"
+)
+
+
+# --------------------------------------------------
 # Helpers
 # --------------------------------------------------
-
 def get_base64_image(image_path: str):
     try:
         with open(image_path, "rb") as img_file:
@@ -30,8 +39,6 @@ def speak_text(text: str):
 
         function speakNow() {{
             const utterance = new SpeechSynthesisUtterance(text);
-
-            // iPhone-safe + child-friendlier feel
             utterance.rate = 0.98;
             utterance.pitch = 1.18;
             utterance.volume = 1.0;
@@ -91,81 +98,38 @@ def transcribe_audio(audio_file):
 
     except sr.UnknownValueError:
         return "I couldn't understand that."
-    except Exception as e:
-        return f"Error: {e}"
+    except Exception:
+        return "I had trouble understanding that recording."
 
 
 def interpret_child_message(text: str):
     lowered = text.lower().strip()
 
-    if any(phrase in lowered for phrase in [
-        "i am happy", "i'm happy", "happy", "good", "excited", "great"
-    ]):
-        return {
-            "intent": "emotion_happy",
-            "response": "I’m so glad you feel happy. That makes me smile."
-        }
+    if any(phrase in lowered for phrase in ["i am happy", "i'm happy", "happy", "good", "excited", "great"]):
+        return "I’m so glad you feel happy. That makes me smile."
 
-    if any(phrase in lowered for phrase in [
-        "i am sad", "i'm sad", "sad", "crying", "unhappy", "upset"
-    ]):
-        return {
-            "intent": "emotion_sad",
-            "response": "It’s okay to feel sad. I’m here with you. Let’s take a slow breath together."
-        }
+    if any(phrase in lowered for phrase in ["i am sad", "i'm sad", "sad", "crying", "unhappy", "upset"]):
+        return "It’s okay to feel sad. I’m here with you. Let’s take a slow breath together."
 
-    if any(phrase in lowered for phrase in [
-        "i am angry", "i'm angry", "angry", "mad", "frustrated"
-    ]):
-        return {
-            "intent": "emotion_angry",
-            "response": "I see you’re feeling angry. That’s okay. Let’s pause and take a deep breath together."
-        }
+    if any(phrase in lowered for phrase in ["i am angry", "i'm angry", "angry", "mad", "frustrated"]):
+        return "I see you’re feeling angry. That’s okay. Let’s pause and take a deep breath together."
 
-    if any(phrase in lowered for phrase in [
-        "i am scared", "i'm scared", "scared", "afraid", "nervous", "worried"
-    ]):
-        return {
-            "intent": "emotion_scared",
-            "response": "You are safe right now. I’m here with you. Let’s take a calm breath together."
-        }
+    if any(phrase in lowered for phrase in ["i am scared", "i'm scared", "scared", "afraid", "nervous", "worried"]):
+        return "You are safe right now. I’m here with you. Let’s take a calm breath together."
 
-    if any(phrase in lowered for phrase in [
-        "i need help", "help me", "can you help", "help"
-    ]):
-        return {
-            "intent": "need_help",
-            "response": "I can help you. Let’s take one small step together."
-        }
+    if any(phrase in lowered for phrase in ["i need help", "help me", "can you help", "help"]):
+        return "I can help you. Let’s take one small step together."
 
-    if any(phrase in lowered for phrase in [
-        "i need a break", "break", "too much", "too loud", "i want a break"
-    ]):
-        return {
-            "intent": "need_break",
-            "response": "It is okay to take a break. Let’s breathe and rest for a moment."
-        }
+    if any(phrase in lowered for phrase in ["i need a break", "break", "too much", "too loud", "i want a break"]):
+        return "It is okay to take a break. Let’s breathe and rest for a moment."
 
-    if any(phrase in lowered for phrase in [
-        "hello", "hi", "hey"
-    ]):
-        return {
-            "intent": "greeting",
-            "response": "Hello, friend. I’m happy to talk with you."
-        }
+    if any(phrase in lowered for phrase in ["hello", "hi", "hey"]):
+        return "Hello, friend. I’m happy to talk with you."
 
-    if any(phrase in lowered for phrase in [
-        "i am okay", "i'm okay", "okay", "fine"
-    ]):
-        return {
-            "intent": "okay",
-            "response": "I’m glad you told me. Thank you for checking in with me."
-        }
+    if any(phrase in lowered for phrase in ["i am okay", "i'm okay", "okay", "fine"]):
+        return "I’m glad you told me. Thank you for checking in with me."
 
-    return {
-        "intent": "unknown",
-        "response": "Thank you for telling me. I am here with you."
-    }
+    return "Thank you for telling me. I am here with you."
 
 
 def get_response(emotion: str):
@@ -191,9 +155,11 @@ def speak_phrase(phrase: str):
     st.session_state.last_spoken_phrase = phrase
     speak_text(phrase)
 
+
 def start_splash():
     st.session_state.splash_started = True
     speak_text("Hi friend. I’m Jayden. Let’s have a calm day together.")
+
 
 def render_jayden_bike_intro(avatar_base64=None):
     if avatar_base64:
@@ -227,21 +193,11 @@ def render_jayden_bike_intro(avatar_base64=None):
         </div>
     </div>
     """
+    st.markdown(html, unsafe_allow_html=True)
 
-    st.markdown(html, unsafe_allow_html=True) 
-
-
-# --------------------------------------------------
-# Page config
-# --------------------------------------------------
-st.set_page_config(
-    page_title="Jayden’s Calm Journey | Autism Support Chatbot",
-    page_icon="🎈",
-    layout="centered"
-)
 
 # --------------------------------------------------
-# App Store-style UI
+# Styles
 # --------------------------------------------------
 st.markdown("""
 <style>
@@ -300,20 +256,10 @@ section.main > div {
 .b7 { left: 89%; background: #aee6ff; animation-duration: 23s; animation-delay: 4s; }
 
 @keyframes floatUp {
-    0% {
-        transform: translateY(0) translateX(0px);
-        opacity: 0;
-    }
-    10% {
-        opacity: 0.22;
-    }
-    50% {
-        transform: translateY(-52vh) translateX(12px);
-    }
-    100% {
-        transform: translateY(-120vh) translateX(-10px);
-        opacity: 0;
-    }
+    0%   { transform: translateY(0) translateX(0px); opacity: 0; }
+    10%  { opacity: 0.22; }
+    50%  { transform: translateY(-52vh) translateX(12px); }
+    100% { transform: translateY(-120vh) translateX(-10px); opacity: 0; }
 }
 
 .block-container {
@@ -414,7 +360,74 @@ section.main > div {
     border-radius: 18px;
 }
 
-/* Home animation */
+/* Splash */
+.splash-wrap {
+    text-align: center;
+    padding: 2rem 1.5rem 1rem;
+}
+
+.splash-title {
+    font-size: 2.3rem;
+    font-weight: 800;
+    color: #17384b;
+    margin-bottom: 0.25rem;
+}
+
+.splash-subtitle {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #4b6f82;
+    margin-bottom: 0.4rem;
+}
+
+.splash-caption {
+    color: #6a8998;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.splash-avatar-wrap {
+    position: relative;
+    display: inline-block;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.splash-avatar {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 6px solid rgba(255,255,255,0.95);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+    background: white;
+}
+
+.splash-wave {
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    font-size: 2.2rem;
+    transform-origin: 30% 70%;
+    animation: splashWave 1.2s ease-in-out infinite;
+}
+
+.splash-card {
+    background: linear-gradient(135deg, #d8eefb 0%, #eef8ff 100%);
+    border-radius: 24px;
+    padding: 1rem;
+    margin: 0 auto 1rem auto;
+    max-width: 560px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+@keyframes splashWave {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(18deg); }
+    50%      { transform: rotate(-10deg); }
+    75%      { transform: rotate(18deg); }
+}
+
+/* Home bike animation */
 .jayden-stage {
     position: relative;
     height: 190px;
@@ -591,48 +604,6 @@ section.main > div {
     97%           { transform: rotate(14deg); }
     98%           { transform: rotate(0deg); }
 }
-
-st.markdown("""
-<style>
-
-.splash-wrap {
-    padding: 2rem 1.5rem 1rem;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-.splash-title {
-    font-size: 2.3rem;
-    font-weight: 800;
-    color: #17384b;
-}
-
-.splash-subtitle {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #4b6f82;
-}
-
-.splash-caption {
-    color: #6a8998;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-}
-
-.splash-avatar {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-}
-
-@keyframes splashWave {
-    0%,100% { transform: rotate(0deg); }
-    50% { transform: rotate(18deg); }
-}
-
-</style>
-""", unsafe_allow_html=True)
 </style>
 
 <div class="balloon-bg">
@@ -645,6 +616,7 @@ st.markdown("""
     <div class="balloon b7"></div>
 </div>
 """, unsafe_allow_html=True)
+
 
 # --------------------------------------------------
 # Session state
@@ -667,6 +639,7 @@ if "selected_emotion" not in st.session_state:
 
 if "last_spoken_phrase" not in st.session_state:
     st.session_state.last_spoken_phrase = "Help me, please."
+
 
 # --------------------------------------------------
 # Emotion map
@@ -694,8 +667,9 @@ emotion_map = {
     },
 }
 
+
 # --------------------------------------------------
-# Header with avatar
+# Avatar/header
 # --------------------------------------------------
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 AVATAR_FILE = os.path.join(APP_DIR, "jayden_avatar.png")
@@ -721,42 +695,79 @@ with avatar_col:
             unsafe_allow_html=True
         )
     else:
-        st.markdown(
-            "<div style='font-size:3rem; text-align:center; margin-top:8px;'>🎈</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='font-size:3rem; text-align:center; margin-top:8px;'>🎈</div>", unsafe_allow_html=True)
 
 st.markdown(
     "<div class='app-caption'>A gentle space to help children feel calm, safe, and understood.</div>",
     unsafe_allow_html=True
 )
 
-if st.button("🔊 Test Voice Output"):
-    speak_text("Hello, friend. I am here to help you.")
-    st.success("Voice test triggered.")
-# --------------------------------------------------
-# HEADER (your avatar + title section)
-# --------------------------------------------------
 
-# 👇 ADD STEP 4 RIGHT HERE 👇
-
+# --------------------------------------------------
+# Splash screen
+# --------------------------------------------------
 if st.session_state.show_splash:
-    st.markdown("SPLASH UI HERE")
+    st.markdown("""
+    <div class="splash-wrap">
+        <div class="splash-title">🎈 Jayden’s Calm Journey</div>
+        <div class="splash-subtitle">Autism Support Chatbot</div>
+        <div class="splash-caption">A gentle space to help children feel calm, safe, and understood.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    if st.button("✨ Tap to Start with Jayden"):
-        start_splash()
+    if avatar_base64:
+        st.markdown(
+            f"""
+            <div style="display:flex; justify-content:center;">
+                <div class="splash-avatar-wrap">
+                    <img src="data:image/png;base64,{avatar_base64}" class="splash-avatar" />
+                    <div class="splash-wave">👋</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown("""
+        <div style="display:flex; justify-content:center;">
+            <div class="splash-avatar-wrap">
+                <div class="splash-avatar" style="display:flex; align-items:center; justify-content:center; font-size:3rem;">🎈</div>
+                <div class="splash-wave">👋</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if st.session_state.splash_started:
-        if st.button("🌈 Start My Calm Journey"):
+    st.markdown("""
+    <div class="splash-card">
+        <div class="card-title">Hi, I’m Jayden 👋</div>
+        <div class="card-text">
+            I’m here to help you use your words, feel calm, and take one small step at a time.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if not st.session_state.splash_started:
+        if st.button("✨ Tap to Start with Jayden", use_container_width=True):
+            start_splash()
+    else:
+        st.success("Jayden is welcoming you...")
+        if st.button("🌈 Start My Calm Journey", use_container_width=True):
             st.session_state.show_splash = False
             st.session_state.splash_started = False
             st.rerun()
 
     st.stop()
 
-# 👇 THIS STAYS BELOW 👇
 
+# --------------------------------------------------
+# Screen router
+# --------------------------------------------------
 screen = st.session_state.screen
+
+if st.button("🔊 Test Voice Output"):
+    speak_text("Hello, friend. I am here to help you.")
+    st.success("Voice test triggered.")
+
 
 # --------------------------------------------------
 # Home
@@ -786,6 +797,7 @@ if screen == "home":
     if st.button("💬 Talk with Jayden", use_container_width=True):
         go("talking")
 
+
 # --------------------------------------------------
 # Feelings
 # --------------------------------------------------
@@ -814,6 +826,7 @@ elif screen == "feelings":
     if st.button("🏠 Home", use_container_width=True):
         go("home")
 
+
 # --------------------------------------------------
 # Response
 # --------------------------------------------------
@@ -836,6 +849,7 @@ elif screen == "response":
 
     if st.button("🏠 Home", use_container_width=True):
         go("home")
+
 
 # --------------------------------------------------
 # Speak for Me
@@ -892,6 +906,7 @@ elif screen == "speak":
     if st.button("🏠 Home", use_container_width=True):
         go("home")
 
+
 # --------------------------------------------------
 # Calm down
 # --------------------------------------------------
@@ -921,6 +936,7 @@ elif screen == "calm":
 
     if st.button("🏠 Home", use_container_width=True):
         go("home")
+
 
 # --------------------------------------------------
 # Routine
@@ -954,6 +970,7 @@ elif screen == "routine":
 
     if st.button("🏠 Home", use_container_width=True):
         go("home")
+
 
 # --------------------------------------------------
 # Talk with Jayden
@@ -1000,13 +1017,11 @@ elif screen == "talking":
             text = transcribe_audio(audio)
             st.write("You said:", text)
 
-            result = interpret_child_message(text)
-            response = result["response"]
-
+            response = interpret_child_message(text)
             st.success(response)
             speak_text(response)
 
-            if result["intent"] in ["emotion_angry", "emotion_sad", "emotion_scared", "need_break"]:
+            if any(word in text.lower() for word in ["angry", "sad", "scared", "break", "upset", "worried"]):
                 st.info("You can also use Calm Down for breathing support.")
 
     if st.button("🏠 Home", use_container_width=True):
