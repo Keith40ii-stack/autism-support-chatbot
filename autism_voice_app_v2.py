@@ -1,8 +1,9 @@
 import os
 import time
+import json
 import tempfile
 import streamlit as st
-import pyttsx3
+import streamlit.components.v1 as components
 import speech_recognition as sr
 
 # -----------------------------
@@ -13,61 +14,84 @@ st.set_page_config(
     page_icon="🌈",
     layout="centered"
 )
+st.markdown("""
+<style>
+/* Main app background */
+.stApp {
+    background: linear-gradient(180deg, #e6f4fb 0%, #f4fbff 100%);
+}
 
+/* Main content container */
+.block-container {
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 2rem;
+    border-radius: 20px;
+}
+
+/* Buttons - softer look */
+.stButton > button {
+    border-radius: 12px;
+    height: 3em;
+    font-size: 1rem;
+    border: none;
+    background-color: #d6eef9;
+    color: #234;
+}
+
+/* Button hover */
+.stButton > button:hover {
+    background-color: #bfe4f5;
+}
+
+/* Titles */
+h1, h2, h3 {
+    color: #2b4c5a;
+}
+</style>
+""", unsafe_allow_html=True)
 # -----------------------------
 # Debug info
 # -----------------------------
 st.write("DEBUG FILE:", os.path.abspath(__file__))
-st.write("DEBUG VERSION: KID FRIENDLY VOICE + SPEAK SCREEN BUILD")
+st.write("DEBUG VERSION: CLOUD FRIENDLY SPEECH BUILD")
 
 # -----------------------------
-# Voice selection helper
+# Browser-based voice output
 # -----------------------------
-def get_best_voice_id(engine):
-    voices = engine.getProperty("voices")
-    if not voices:
-        return None
+def speak_text(text: str):
+    safe_text = json.dumps(text)
+    js_code = f"""
+    <script>
+    const text = {safe_text};
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
 
-    preferred_names = ["zira", "female", "hazel", "susan"]
-    fallback_names = ["david", "male"]
+    const voices = window.speechSynthesis.getVoices();
 
-    # First pass: kid-friendlier / softer voices
-    for preferred in preferred_names:
-        for voice in voices:
-            voice_name = getattr(voice, "name", "").lower()
-            if preferred in voice_name:
-                return voice.id
+    // Prefer a softer / more kid-friendly voice if available
+    const preferredNames = ["Samantha", "Google US English", "Microsoft Zira", "Karen", "Moira"];
+    let chosenVoice = null;
 
-    # Second pass: anything not obviously male if possible
-    for voice in voices:
-        voice_name = getattr(voice, "name", "").lower()
-        if not any(word in voice_name for word in fallback_names):
-            return voice.id
+    for (const preferred of preferredNames) {{
+        chosenVoice = voices.find(v => v.name && v.name.includes(preferred));
+        if (chosenVoice) break;
+    }}
 
-    # Final fallback: first available
-    return voices[0].id
+    if (!chosenVoice && voices.length > 0) {{
+        chosenVoice = voices[0];
+    }}
 
-# -----------------------------
-# Voice output
-# -----------------------------
-def speak_text(text):
-    try:
-        engine = pyttsx3.init()
+    if (chosenVoice) {{
+        utterance.voice = chosenVoice;
+    }}
 
-        # Kid-friendlier pacing
-        engine.setProperty("rate", 135)
-        engine.setProperty("volume", 0.95)
-
-        best_voice = get_best_voice_id(engine)
-        if best_voice:
-            engine.setProperty("voice", best_voice)
-
-        engine.say(text)
-        engine.runAndWait()
-        engine.stop()
-
-    except Exception as e:
-        st.warning(f"Voice output error: {e}")
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    </script>
+    """
+    components.html(js_code, height=0)
 
 # -----------------------------
 # Voice input / transcription
@@ -94,7 +118,7 @@ def transcribe_audio(audio_file):
 # -----------------------------
 # Smart microphone understanding
 # -----------------------------
-def interpret_child_message(text):
+def interpret_child_message(text: str):
     lowered = text.lower().strip()
 
     if any(phrase in lowered for phrase in [
@@ -106,7 +130,7 @@ def interpret_child_message(text):
         }
 
     if any(phrase in lowered for phrase in [
-        "i am sad", "i'm sad", "sad", "crying", "unhappy"
+        "i am sad", "i'm sad", "sad", "crying", "unhappy", "upset"
     ]):
         return {
             "intent": "emotion_sad",
@@ -114,7 +138,7 @@ def interpret_child_message(text):
         }
 
     if any(phrase in lowered for phrase in [
-        "i am angry", "i'm angry", "angry", "mad", "frustrated", "upset"
+        "i am angry", "i'm angry", "angry", "mad", "frustrated"
     ]):
         return {
             "intent": "emotion_angry",
@@ -169,7 +193,7 @@ def interpret_child_message(text):
 # -----------------------------
 # Chatbot responses
 # -----------------------------
-def get_response(emotion):
+def get_response(emotion: str):
     responses = {
         "happy": "I’m so glad you feel happy. That makes me smile.",
         "sad": "It’s okay to feel sad. I’m here with you. Let’s take a slow breath together.",
@@ -223,24 +247,24 @@ emotion_map = {
 # -----------------------------
 # Navigation helpers
 # -----------------------------
-def go(screen_name):
+def go(screen_name: str):
     st.session_state.screen = screen_name
 
-def select_emotion(emotion):
+def select_emotion(emotion: str):
     st.session_state.selected_emotion = emotion_map[emotion]
     response = get_response(emotion.lower())
     speak_text(response)
     go("response")
 
-def speak_phrase(phrase):
+def speak_phrase(phrase: str):
     st.session_state.last_spoken_phrase = phrase
     speak_text(phrase)
 
 # -----------------------------
-# Title / header
+# Header
 # -----------------------------
 st.title("Autism Support Chatbot")
-st.caption("Kid-friendly voice, communication support, and smart microphone input")
+st.caption("Cloud-friendly voice, communication support, and smart microphone input")
 
 if st.button("🔊 Test Voice Output"):
     speak_text("Hello, friend. I am here to help you.")
