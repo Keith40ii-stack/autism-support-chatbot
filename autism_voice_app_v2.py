@@ -23,54 +23,53 @@ def speak_text(text: str):
     safe_text = json.dumps(text)
     js_code = f"""
     <script>
-    const text = {safe_text};
-    const utterance = new SpeechSynthesisUtterance(text);
+    (function() {{
+        const text = {safe_text};
+        const synth = window.speechSynthesis;
 
-    utterance.rate = 0.96;
-    utterance.pitch = 1.14;
-    utterance.volume = 1.0;
+        function speakNow() {{
+            const utterance = new SpeechSynthesisUtterance(text);
 
-    function pickVoice() {{
-        const voices = window.speechSynthesis.getVoices();
-        const preferredNames = [
-            "Google US English",
-            "Samantha",
-            "Microsoft Zira",
-            "Karen",
-            "Moira",
-            "Alex",
-            "Eddy",
-            "Evan"
-        ];
+            // iPhone-safe + child-friendlier feel
+            utterance.rate = 0.98;
+            utterance.pitch = 1.18;
+            utterance.volume = 1.0;
 
-        let chosenVoice = null;
+            const voices = synth.getVoices();
+            const preferredNames = [
+                "Samantha",
+                "Google US English",
+                "Microsoft Zira",
+                "Karen",
+                "Moira",
+                "Alex"
+            ];
 
-        for (const preferred of preferredNames) {{
-            chosenVoice = voices.find(v => v.name && v.name.includes(preferred));
-            if (chosenVoice) break;
+            let chosenVoice = null;
+
+            for (const preferred of preferredNames) {{
+                chosenVoice = voices.find(v => v.name && v.name.includes(preferred));
+                if (chosenVoice) break;
+            }}
+
+            if (!chosenVoice) {{
+                chosenVoice = voices.find(v => v.lang && v.lang.startsWith("en"));
+            }}
+
+            if (chosenVoice) {{
+                utterance.voice = chosenVoice;
+            }}
+
+            synth.cancel();
+            synth.speak(utterance);
         }}
 
-        if (!chosenVoice) {{
-            chosenVoice = voices.find(v => v.lang && v.lang.startsWith("en"));
+        if (synth.getVoices().length === 0) {{
+            synth.onvoiceschanged = speakNow;
+        }} else {{
+            speakNow();
         }}
-
-        if (!chosenVoice && voices.length > 0) {{
-            chosenVoice = voices[0];
-        }}
-
-        if (chosenVoice) {{
-            utterance.voice = chosenVoice;
-        }}
-
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
-    }}
-
-    if (window.speechSynthesis.getVoices().length === 0) {{
-        window.speechSynthesis.onvoiceschanged = pickVoice;
-    }} else {{
-        pickVoice();
-    }}
+    }})();
     </script>
     """
     components.html(js_code, height=0)
@@ -184,14 +183,49 @@ def go(screen_name: str):
 
 def select_emotion(emotion: str):
     st.session_state.selected_emotion = emotion_map[emotion]
-    response = get_response(emotion.lower())
-    speak_text(response)
     go("response")
 
 
 def speak_phrase(phrase: str):
     st.session_state.last_spoken_phrase = phrase
     speak_text(phrase)
+
+
+def render_jayden_bike_intro(avatar_base64: str | None):
+    if avatar_base64:
+        avatar_html = f"""
+        <div class="jayden-avatar-wrap">
+            <img src="data:image/png;base64,{avatar_base64}" class="jayden-avatar" />
+            <div class="jayden-wave">👋</div>
+        </div>
+        """
+    else:
+        avatar_html = """
+        <div class="jayden-avatar-wrap">
+            <div class="jayden-avatar jayden-fallback-avatar">🎈</div>
+            <div class="jayden-wave">👋</div>
+        </div>
+        """
+
+    st.markdown(
+        f"""
+        <div class="jayden-stage">
+            <div class="jayden-ground"></div>
+            <div class="jayden-rider">
+                {avatar_html}
+                <div class="bike">
+                    <div class="wheel left"></div>
+                    <div class="wheel right"></div>
+                    <div class="bike-frame">
+                        <div class="handlebar"></div>
+                        <div class="seat"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # --------------------------------------------------
@@ -376,6 +410,184 @@ section.main > div {
 [data-testid="stInfo"] {
     border-radius: 18px;
 }
+
+/* Home animation */
+.jayden-stage {
+    position: relative;
+    height: 190px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.jayden-ground {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 28px;
+    height: 6px;
+    background: linear-gradient(90deg, rgba(180,220,240,0.2), rgba(120,190,220,0.45), rgba(180,220,240,0.2));
+    border-radius: 999px;
+}
+
+.jayden-rider {
+    position: absolute;
+    bottom: 20px;
+    left: -180px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation:
+        rideIn 4.6s ease-out 0.2s forwards,
+        gentleBob 2.2s ease-in-out 4.9s infinite;
+}
+
+.jayden-avatar-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.jayden-avatar {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.95);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+    background: white;
+    animation: peekForward 7s ease-in-out 6s infinite;
+    transform-origin: center center;
+}
+
+.jayden-fallback-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+}
+
+.jayden-wave {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    font-size: 1.8rem;
+    transform-origin: 30% 70%;
+    animation:
+        waveHello 1.2s ease-in-out 4.9s 3,
+        waveIdle 10s ease-in-out 10s infinite;
+}
+
+.bike {
+    position: relative;
+    width: 90px;
+    height: 52px;
+}
+
+.wheel {
+    position: absolute;
+    bottom: 0;
+    width: 28px;
+    height: 28px;
+    border: 4px solid #5fa9cc;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.85);
+    animation: spinWheel 0.8s linear infinite;
+}
+
+.wheel.left { left: 0; }
+.wheel.right { right: 0; }
+
+.bike-frame {
+    position: absolute;
+    left: 18px;
+    top: 10px;
+    width: 54px;
+    height: 24px;
+}
+
+.bike-frame::before,
+.bike-frame::after {
+    content: "";
+    position: absolute;
+    background: #6bb7da;
+    border-radius: 999px;
+}
+
+.bike-frame::before {
+    width: 44px;
+    height: 4px;
+    top: 8px;
+    left: 4px;
+    transform: rotate(-12deg);
+}
+
+.bike-frame::after {
+    width: 24px;
+    height: 4px;
+    top: 14px;
+    left: 16px;
+    transform: rotate(35deg);
+}
+
+.handlebar,
+.seat {
+    position: absolute;
+    background: #4b6f82;
+    border-radius: 999px;
+}
+
+.handlebar {
+    width: 12px;
+    height: 4px;
+    top: 4px;
+    right: 12px;
+    transform: rotate(-18deg);
+}
+
+.seat {
+    width: 12px;
+    height: 4px;
+    top: 6px;
+    left: 10px;
+}
+
+@keyframes rideIn {
+    0%   { left: -180px; }
+    65%  { left: 52%; transform: translateX(-50%); }
+    100% { left: 62%; transform: translateX(-50%); }
+}
+
+@keyframes gentleBob {
+    0%, 100% { transform: translateX(-50%) translateY(0px); }
+    50%      { transform: translateX(-50%) translateY(-3px); }
+}
+
+@keyframes peekForward {
+    0%, 72%, 100% { transform: scale(1) translateX(0px); }
+    78%           { transform: scale(1.08) translateX(10px); }
+    84%           { transform: scale(1.02) translateX(4px); }
+}
+
+@keyframes spinWheel {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes waveHello {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(18deg); }
+    50%      { transform: rotate(-10deg); }
+    75%      { transform: rotate(18deg); }
+}
+
+@keyframes waveIdle {
+    0%, 94%, 100% { transform: rotate(0deg); }
+    95%           { transform: rotate(16deg); }
+    96%           { transform: rotate(-8deg); }
+    97%           { transform: rotate(14deg); }
+    98%           { transform: rotate(0deg); }
+}
 </style>
 
 <div class="balloon-bg">
@@ -478,6 +690,8 @@ screen = st.session_state.screen
 # Home
 # --------------------------------------------------
 if screen == "home":
+    render_jayden_bike_intro(avatar_base64)
+
     st.markdown("""
     <div class='hero-card'>
         <div class='card-title'>Hello, Friend 😊</div>
@@ -497,7 +711,7 @@ if screen == "home":
     if st.button("📅 My Routine", use_container_width=True):
         go("routine")
 
-    if st.button("💬 Practice Talking", use_container_width=True):
+    if st.button("💬 Talk with Jayden", use_container_width=True):
         go("talking")
 
 # --------------------------------------------------
@@ -533,6 +747,7 @@ elif screen == "feelings":
 # --------------------------------------------------
 elif screen == "response":
     selected = st.session_state.selected_emotion
+    response_text = f"{selected['heading']} {selected['body']}"
 
     st.markdown(f"""
     <div class='soft-card'>
@@ -541,8 +756,8 @@ elif screen == "response":
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("▶ Listen Again", use_container_width=True):
-        speak_text(selected["heading"] + " " + selected["body"])
+    if st.button("🔊 Speak", use_container_width=True):
+        speak_text(response_text)
 
     if st.button("🧘 Calm Down", use_container_width=True):
         go("calm")
@@ -623,7 +838,6 @@ elif screen == "calm":
     with col1:
         if st.button("✅ Done", use_container_width=True):
             st.success("Great job calming your body.")
-            speak_text("Great job calming your body.")
 
     with col2:
         if st.button("🔁 Repeat", use_container_width=True):
@@ -662,18 +876,20 @@ elif screen == "routine":
 
     if st.button("➡ Next Step", use_container_width=True):
         st.success("Great job. Keep going.")
+
+    if st.button("🔊 Say Encouragement", use_container_width=True):
         speak_text("Great job. Keep going.")
 
     if st.button("🏠 Home", use_container_width=True):
         go("home")
 
 # --------------------------------------------------
-# Practice talking
+# Talk with Jayden
 # --------------------------------------------------
 elif screen == "talking":
     st.markdown("""
     <div class='soft-card'>
-        <div class='card-title'>💬 Practice Talking</div>
+        <div class='card-title'>💬 Talk with Jayden</div>
         <div class='card-text'>Let’s practice simple words together.</div>
     </div>
     """, unsafe_allow_html=True)
