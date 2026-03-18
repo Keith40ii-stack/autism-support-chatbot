@@ -11,6 +11,7 @@ import speech_recognition as sr
 # --------------------------------------------------
 # Helpers
 # --------------------------------------------------
+
 def get_base64_image(image_path: str):
     try:
         with open(image_path, "rb") as img_file:
@@ -190,6 +191,9 @@ def speak_phrase(phrase: str):
     st.session_state.last_spoken_phrase = phrase
     speak_text(phrase)
 
+def start_splash():
+    st.session_state.splash_started = True
+    speak_text("Hi friend. I’m Jayden. Let’s have a calm day together.")
 
 def render_jayden_bike_intro(avatar_base64=None):
     if avatar_base64:
@@ -587,6 +591,48 @@ section.main > div {
     97%           { transform: rotate(14deg); }
     98%           { transform: rotate(0deg); }
 }
+
+st.markdown("""
+<style>
+
+.splash-wrap {
+    padding: 2rem 1.5rem 1rem;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+.splash-title {
+    font-size: 2.3rem;
+    font-weight: 800;
+    color: #17384b;
+}
+
+.splash-subtitle {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #4b6f82;
+}
+
+.splash-caption {
+    color: #6a8998;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.splash-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+}
+
+@keyframes splashWave {
+    0%,100% { transform: rotate(0deg); }
+    50% { transform: rotate(18deg); }
+}
+
+</style>
+""", unsafe_allow_html=True)
 </style>
 
 <div class="balloon-bg">
@@ -605,6 +651,12 @@ section.main > div {
 # --------------------------------------------------
 if "screen" not in st.session_state:
     st.session_state.screen = "home"
+
+if "show_splash" not in st.session_state:
+    st.session_state.show_splash = True
+
+if "splash_started" not in st.session_state:
+    st.session_state.splash_started = False
 
 if "selected_emotion" not in st.session_state:
     st.session_state.selected_emotion = {
@@ -682,6 +734,27 @@ st.markdown(
 if st.button("🔊 Test Voice Output"):
     speak_text("Hello, friend. I am here to help you.")
     st.success("Voice test triggered.")
+# --------------------------------------------------
+# HEADER (your avatar + title section)
+# --------------------------------------------------
+
+# 👇 ADD STEP 4 RIGHT HERE 👇
+
+if st.session_state.show_splash:
+    st.markdown("SPLASH UI HERE")
+
+    if st.button("✨ Tap to Start with Jayden"):
+        start_splash()
+
+    if st.session_state.splash_started:
+        if st.button("🌈 Start My Calm Journey"):
+            st.session_state.show_splash = False
+            st.session_state.splash_started = False
+            st.rerun()
+
+    st.stop()
+
+# 👇 THIS STAYS BELOW 👇
 
 screen = st.session_state.screen
 
