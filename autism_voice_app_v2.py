@@ -6,27 +6,36 @@ import streamlit as st
 import streamlit.components.v1 as components
 import speech_recognition as sr
 
-# -----------------------------
-# App configuration
-# -----------------------------
+# --------------------------------------------------
+# Page config
+# --------------------------------------------------
 st.set_page_config(
-    page_title= "Jayden’s Calm Journey | Autism Support Chatbot",
+    page_title="Jayden’s Calm Journey | Autism Support Chatbot",
     page_icon="🎈",
     layout="centered"
 )
 
-# -----------------------------
-# Soft blue background + moving balloons
-# -----------------------------
+# --------------------------------------------------
+# App Store-style UI
+# --------------------------------------------------
 st.markdown("""
 <style>
-/* Overall app background */
+/* ---------- Global ---------- */
 .stApp {
-    background: linear-gradient(180deg, #dff4ff 0%, #eefaff 45%, #f8fdff 100%);
+    background: linear-gradient(180deg, #dff3ff 0%, #edf9ff 45%, #f8fdff 100%);
     overflow: hidden;
+    color: #163240;
 }
 
-/* Floating balloon background */
+[data-testid="stHeader"] {
+    background: rgba(0,0,0,0);
+}
+
+section.main > div {
+    padding-top: 1rem;
+}
+
+/* ---------- Balloon background ---------- */
 .balloon-bg {
     position: fixed;
     inset: 0;
@@ -35,48 +44,37 @@ st.markdown("""
     overflow: hidden;
 }
 
-/* App content card */
-.block-container {
-    position: relative;
-    z-index: 1;
-    background: rgba(255, 255, 255, 0.84);
-    border-radius: 24px;
-    padding: 2rem;
-    margin-top: 1rem;
-    box-shadow: 0 8px 24px rgba(35, 80, 110, 0.08);
-}
-
-/* Balloon styling */
 .balloon {
     position: absolute;
-    bottom: -140px;
-    width: 70px;
-    height: 90px;
+    bottom: -150px;
+    width: 74px;
+    height: 96px;
     border-radius: 50% 50% 45% 45%;
-    opacity: 0.22;
+    opacity: 0.20;
     animation-name: floatUp;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
+    filter: blur(0.2px);
 }
 
 .balloon::after {
     content: "";
     position: absolute;
     left: 50%;
-    top: 88px;
+    top: 94px;
     width: 2px;
-    height: 70px;
-    background: rgba(120, 140, 160, 0.25);
+    height: 72px;
+    background: rgba(110, 130, 145, 0.22);
     transform: translateX(-50%);
 }
 
-.b1 { left: 6%;  background: #8fd3ff; animation-duration: 20s; animation-delay: 0s; }
-.b2 { left: 18%; background: #ffd6e7; animation-duration: 24s; animation-delay: 4s; }
-.b3 { left: 31%; background: #ffe49c; animation-duration: 22s; animation-delay: 2s; }
-.b4 { left: 47%; background: #bde7c8; animation-duration: 26s; animation-delay: 6s; }
-.b5 { left: 63%; background: #cfc7ff; animation-duration: 21s; animation-delay: 1s; }
-.b6 { left: 78%; background: #ffcfb3; animation-duration: 25s; animation-delay: 5s; }
-.b7 { left: 90%; background: #aee6ff; animation-duration: 23s; animation-delay: 3s; }
+.b1 { left: 5%;  background: #8fd3ff; animation-duration: 19s; animation-delay: 0s; }
+.b2 { left: 16%; background: #ffd8e8; animation-duration: 24s; animation-delay: 3s; }
+.b3 { left: 29%; background: #ffe49f; animation-duration: 22s; animation-delay: 1s; }
+.b4 { left: 43%; background: #bde7c8; animation-duration: 25s; animation-delay: 5s; }
+.b5 { left: 58%; background: #cfc8ff; animation-duration: 20s; animation-delay: 2s; }
+.b6 { left: 74%; background: #ffcfb3; animation-duration: 26s; animation-delay: 6s; }
+.b7 { left: 89%; background: #aee6ff; animation-duration: 23s; animation-delay: 4s; }
 
 @keyframes floatUp {
     0% {
@@ -87,7 +85,7 @@ st.markdown("""
         opacity: 0.22;
     }
     50% {
-        transform: translateY(-50vh) translateX(12px);
+        transform: translateY(-52vh) translateX(12px);
     }
     100% {
         transform: translateY(-120vh) translateX(-10px);
@@ -95,33 +93,118 @@ st.markdown("""
     }
 }
 
-/* Buttons */
-.stButton > button {
-    border-radius: 16px;
-    height: 3.2em;
+/* ---------- Main container ---------- */
+.block-container {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    background: rgba(255,255,255,0.86);
+    border-radius: 30px;
+    padding: 1.4rem 1.25rem 2rem 1.25rem;
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 18px 40px rgba(43, 91, 122, 0.10);
+    backdrop-filter: blur(10px);
+}
+
+/* ---------- Typography ---------- */
+.app-brand {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #17384b;
+    margin-bottom: 0.2rem;
+    letter-spacing: -0.02em;
+}
+
+.app-subbrand {
+    text-align: center;
     font-size: 1rem;
-    border: none;
-    background-color: #d6eef9;
-    color: #234;
     font-weight: 600;
+    color: #4b6f82;
+    margin-bottom: 0.3rem;
+}
+
+.app-caption {
+    text-align: center;
+    color: #6a8998;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.hero-card {
+    background: linear-gradient(135deg, #d8eefb 0%, #eef8ff 100%);
+    border-radius: 24px;
+    padding: 1.1rem 1rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    margin-bottom: 1rem;
+}
+
+.soft-card {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(190, 220, 235, 0.65);
+    border-radius: 22px;
+    padding: 1rem 1rem;
+    box-shadow: 0 10px 22px rgba(45, 82, 104, 0.06);
+    margin-bottom: 0.9rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 750;
+    color: #1f4255;
+    margin-bottom: 0.25rem;
+}
+
+.card-text {
+    color: #5a7886;
+    line-height: 1.55;
+    font-size: 0.98rem;
+}
+
+/* ---------- Buttons ---------- */
+.stButton > button {
+    width: 100%;
+    border-radius: 18px;
+    min-height: 3.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    background: linear-gradient(180deg, #d6eef9 0%, #cbe8f7 100%);
+    color: #1d3a4b;
+    box-shadow: 0 6px 14px rgba(67, 131, 168, 0.10);
 }
 
 .stButton > button:hover {
-    background-color: #bfe4f5;
+    background: linear-gradient(180deg, #c8e8f8 0%, #bce1f4 100%);
+    color: #17384b;
 }
 
-/* Headings */
-h1, h2, h3 {
-    color: #2b4c5a;
+.stButton > button:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(151, 209, 239, 0.35);
 }
 
-/* Info-style blocks */
-.custom-note {
-    background: rgba(214, 238, 249, 0.65);
-    padding: 0.9rem 1rem;
-    border-radius: 16px;
-    color: #234;
-    margin-bottom: 1rem;
+/* ---------- Inputs ---------- */
+[data-testid="stAudioInput"] {
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    padding: 0.4rem;
+}
+
+/* ---------- Alerts ---------- */
+[data-testid="stSuccess"] {
+    border-radius: 18px;
+}
+
+[data-testid="stInfo"] {
+    border-radius: 18px;
+}
+
+/* ---------- Divider space ---------- */
+hr {
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
 }
 </style>
 
@@ -136,32 +219,22 @@ h1, h2, h3 {
 </div>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Debug info
-# -----------------------------
-st.write("DEBUG FILE:", os.path.abspath(__file__))
-st.write("DEBUG VERSION: CLEAN CLOUD BUILD WITH BALLOONS")
-
-# -----------------------------
-# Browser-based voice output
-# -----------------------------
+# --------------------------------------------------
+# Browser speech
+# --------------------------------------------------
 def speak_text(text: str):
     safe_text = json.dumps(text)
-
     js_code = f"""
     <script>
     const text = {safe_text};
     const utterance = new SpeechSynthesisUtterance(text);
 
-    // Best balance for a gentle, youthful feel
     utterance.rate = 0.96;
     utterance.pitch = 1.14;
     utterance.volume = 1.0;
 
     function pickVoice() {{
         const voices = window.speechSynthesis.getVoices();
-
-        // Best available voices to try first
         const preferredNames = [
             "Google US English",
             "Samantha",
@@ -180,12 +253,10 @@ def speak_text(text: str):
             if (chosenVoice) break;
         }}
 
-        // Fallback to an English voice
         if (!chosenVoice) {{
             chosenVoice = voices.find(v => v.lang && v.lang.startsWith("en"));
         }}
 
-        // Final fallback
         if (!chosenVoice && voices.length > 0) {{
             chosenVoice = voices[0];
         }}
@@ -207,9 +278,9 @@ def speak_text(text: str):
     """
     components.html(js_code, height=0)
 
-# -----------------------------
-# Voice input / transcription
-# -----------------------------
+# --------------------------------------------------
+# Audio transcription
+# --------------------------------------------------
 def transcribe_audio(audio_file):
     try:
         recognizer = sr.Recognizer()
@@ -228,9 +299,9 @@ def transcribe_audio(audio_file):
     except Exception as e:
         return f"Error: {e}"
 
-# -----------------------------
-# Smart microphone understanding
-# -----------------------------
+# --------------------------------------------------
+# Intent interpretation
+# --------------------------------------------------
 def interpret_child_message(text: str):
     lowered = text.lower().strip()
 
@@ -303,9 +374,9 @@ def interpret_child_message(text: str):
         "response": "Thank you for telling me. I am here with you."
     }
 
-# -----------------------------
+# --------------------------------------------------
 # Emotion responses
-# -----------------------------
+# --------------------------------------------------
 def get_response(emotion: str):
     responses = {
         "happy": "I’m so glad you feel happy. That makes me smile.",
@@ -315,9 +386,9 @@ def get_response(emotion: str):
     }
     return responses.get(emotion, "I’m here to help you. You’re doing a great job.")
 
-# -----------------------------
+# --------------------------------------------------
 # Session state
-# -----------------------------
+# --------------------------------------------------
 if "screen" not in st.session_state:
     st.session_state.screen = "home"
 
@@ -331,9 +402,9 @@ if "selected_emotion" not in st.session_state:
 if "last_spoken_phrase" not in st.session_state:
     st.session_state.last_spoken_phrase = "Help me, please."
 
-# -----------------------------
-# Emotion content
-# -----------------------------
+# --------------------------------------------------
+# Emotion map
+# --------------------------------------------------
 emotion_map = {
     "Happy": {
         "emoji": "😊",
@@ -357,9 +428,9 @@ emotion_map = {
     },
 }
 
-# -----------------------------
+# --------------------------------------------------
 # Navigation helpers
-# -----------------------------
+# --------------------------------------------------
 def go(screen_name: str):
     st.session_state.screen = screen_name
 
@@ -373,11 +444,12 @@ def speak_phrase(phrase: str):
     st.session_state.last_spoken_phrase = phrase
     speak_text(phrase)
 
-# -----------------------------
-# Header
-# -----------------------------
-st.title("Autism Support Chatbot")
-st.caption("A calm, kid-friendly support tool inspired by love, connection, and communication.")
+# --------------------------------------------------
+# Branded header
+# --------------------------------------------------
+st.markdown("<div class='app-brand'>🎈 Jayden’s Calm Journey</div>", unsafe_allow_html=True)
+st.markdown("<div class='app-subbrand'>Autism Support Chatbot</div>", unsafe_allow_html=True)
+st.markdown("<div class='app-caption'>A gentle space to help children feel calm, safe, and understood.</div>", unsafe_allow_html=True)
 
 if st.button("🔊 Test Voice Output"):
     speak_text("Hello, friend. I am here to help you.")
@@ -385,12 +457,16 @@ if st.button("🔊 Test Voice Output"):
 
 screen = st.session_state.screen
 
-# -----------------------------
+# --------------------------------------------------
 # Home
-# -----------------------------
+# --------------------------------------------------
 if screen == "home":
-    st.subheader("😊 Hello, Friend!")
-    st.markdown("<div class='custom-note'>Choose one activity below.</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='hero-card'>
+        <div class='card-title'>Hello, Friend 😊</div>
+        <div class='card-text'>Choose one activity to begin your calm journey.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     if st.button("😊 Feelings", use_container_width=True):
         go("feelings")
@@ -407,12 +483,16 @@ if screen == "home":
     if st.button("💬 Practice Talking", use_container_width=True):
         go("talking")
 
-# -----------------------------
+# --------------------------------------------------
 # Feelings
-# -----------------------------
+# --------------------------------------------------
 elif screen == "feelings":
-    st.subheader("How do you feel?")
-    st.markdown("<div class='custom-note'>Tap a feeling and I will help.</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='soft-card'>
+        <div class='card-title'>How do you feel?</div>
+        <div class='card-text'>Tap a feeling and I will help.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
@@ -431,14 +511,18 @@ elif screen == "feelings":
     if st.button("🏠 Home", use_container_width=True):
         go("home")
 
-# -----------------------------
+# --------------------------------------------------
 # Response
-# -----------------------------
+# --------------------------------------------------
 elif screen == "response":
     selected = st.session_state.selected_emotion
 
-    st.subheader(f"{selected['emoji']} {selected['heading']}")
-    st.write(selected["body"])
+    st.markdown(f"""
+    <div class='soft-card'>
+        <div class='card-title'>{selected['emoji']} {selected['heading']}</div>
+        <div class='card-text'>{selected['body']}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     if st.button("▶ Listen Again", use_container_width=True):
         speak_text(selected["heading"] + " " + selected["body"])
@@ -449,15 +533,16 @@ elif screen == "response":
     if st.button("🏠 Home", use_container_width=True):
         go("home")
 
-# -----------------------------
+# --------------------------------------------------
 # Speak for Me
-# -----------------------------
+# --------------------------------------------------
 elif screen == "speak":
-    st.subheader("🔊 Speak for Me")
-    st.markdown(
-        "<div class='custom-note'>Tap a button and I will say the words out loud for you.</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+    <div class='soft-card'>
+        <div class='card-title'>🔊 Speak for Me</div>
+        <div class='card-text'>Tap a button and I will say the words out loud for you.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
@@ -503,12 +588,16 @@ elif screen == "speak":
     if st.button("🏠 Home", use_container_width=True):
         go("home")
 
-# -----------------------------
-# Calm Down
-# -----------------------------
+# --------------------------------------------------
+# Calm down
+# --------------------------------------------------
 elif screen == "calm":
-    st.subheader("Breathe with me")
-    st.markdown("<div class='custom-note'>Inhale... Exhale...</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='soft-card'>
+        <div class='card-title'>🧘 Breathe with me</div>
+        <div class='card-text'>Inhale... Exhale...</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     progress_bar = st.progress(0)
 
@@ -530,12 +619,16 @@ elif screen == "calm":
     if st.button("🏠 Home", use_container_width=True):
         go("home")
 
-# -----------------------------
+# --------------------------------------------------
 # Routine
-# -----------------------------
+# --------------------------------------------------
 elif screen == "routine":
-    st.subheader("My Routine")
-    st.markdown("<div class='custom-note'>Visual steps make transitions easier.</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='soft-card'>
+        <div class='card-title'>📅 My Routine</div>
+        <div class='card-text'>Visual steps make transitions easier.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     steps = [
         "🪥 Brush Teeth",
@@ -545,7 +638,7 @@ elif screen == "routine":
     ]
 
     for step in steps:
-        st.write(step)
+        st.markdown(f"<div class='soft-card'><div class='card-text'>{step}</div></div>", unsafe_allow_html=True)
 
     if st.button("➡ Next Step", use_container_width=True):
         st.success("Great job. Keep going.")
@@ -554,12 +647,16 @@ elif screen == "routine":
     if st.button("🏠 Home", use_container_width=True):
         go("home")
 
-# -----------------------------
-# Practice Talking
-# -----------------------------
+# --------------------------------------------------
+# Practice talking
+# --------------------------------------------------
 elif screen == "talking":
-    st.subheader("💬 Practice Talking")
-    st.markdown("<div class='custom-note'>Let’s practice simple words together.</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='soft-card'>
+        <div class='card-title'>💬 Practice Talking</div>
+        <div class='card-text'>Let’s practice simple words together.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
@@ -578,9 +675,15 @@ elif screen == "talking":
         speak_text("Let’s practice again. Say hello.")
 
     st.divider()
-    st.subheader("🎤 Talk to me")
 
-    audio = st.audio_input("Press and record your voice")
+    st.markdown("""
+    <div class='soft-card'>
+        <div class='card-title'>🎤 Talk to me</div>
+        <div class='card-text'>Press and record your voice so I can help understand your words.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    audio = st.audio_input("Record your voice")
 
     if audio is not None:
         st.audio(audio)
