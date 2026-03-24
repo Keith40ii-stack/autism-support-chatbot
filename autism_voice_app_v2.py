@@ -147,7 +147,7 @@ def render_splash_video_with_balloons(video_path: str):
     </div>
     """
 
-    components.html(html, height=760)
+    components.html(html, height=900)
 
 def interpret_child_message(text: str):
     lowered = text.lower().strip()
@@ -252,8 +252,8 @@ st.markdown("""
     position: relative;
     width: 100%;
     max-width: 760px;
+    min-height: 860px;
     margin: 0 auto 1rem auto;
-    min-height: 720px;
     overflow: visible;
     border-radius: 24px;
     background: transparent;
@@ -264,7 +264,7 @@ st.markdown("""
     display: block;
     width: 100%;
     height: auto;
-    max-height: 700px;
+    max-height: 820px;
     object-fit: contain;
     z-index: 1;
     background: transparent;
@@ -307,7 +307,7 @@ st.markdown("""
 .sb4 { left: 46%; background: #bde7c8; animation-duration: 26s; }
 .sb5 { left: 66%; background: #cfc8ff; animation-duration: 21s; }
 .sb6 { left: 82%; background: #ffcfb3; animation-duration: 25s; }
-            
+                        
 @keyframes floatUp {
     0%   { transform: translateY(0) translateX(0px); opacity: 0; }
     10%  { opacity: 0.22; }
