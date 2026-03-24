@@ -624,6 +624,42 @@ section.main > div {
     97%           { transform: rotate(14deg); }
     98%           { transform: rotate(0deg); }
 }
+/* 🎈 Splash balloons behind video */
+.splash-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.splash-balloon {
+    position: absolute;
+    bottom: -150px;
+    width: 80px;
+    height: 100px;
+    border-radius: 50% 50% 45% 45%;
+    opacity: 0.18;
+    animation: floatUp linear infinite;
+}
+
+.splash-balloon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 95px;
+    width: 2px;
+    height: 70px;
+    background: rgba(120,140,160,0.25);
+    transform: translateX(-50%);
+}
+
+.sb1 { left: 5%;  background: #8fd3ff; animation-duration: 20s; }
+.sb2 { left: 18%; background: #ffd8e8; animation-duration: 24s; }
+.sb3 { left: 32%; background: #ffe49f; animation-duration: 22s; }
+.sb4 { left: 50%; background: #bde7c8; animation-duration: 26s; }
+.sb5 { left: 70%; background: #cfc8ff; animation-duration: 21s; }
+.sb6 { left: 85%; background: #ffcfb3; animation-duration: 25s; }
 </style>
 
 <div class="balloon-bg">
@@ -710,12 +746,21 @@ st.markdown(
 )# --------------------------------------------------
 # Splash screen
 # --------------------------------------------------
+st.markdown("""
+<div class="splash-bg">
+    <div class="splash-balloon sb1"></div>
+    <div class="splash-balloon sb2"></div>
+    <div class="splash-balloon sb3"></div>
+    <div class="splash-balloon sb4"></div>
+    <div class="splash-balloon sb5"></div>
+    <div class="splash-balloon sb6"></div>
+</div>
+""", unsafe_allow_html=True)
 # --------------------------------------------------
 # Splash screen (Video Intro)
 # --------------------------------------------------
 if st.session_state.show_splash:
-    st.write("DEBUG: Splash is running")  # optional
-
+   
     import os
     video_path = os.path.join(os.getcwd(), "jayden_intro.mp4")
 
