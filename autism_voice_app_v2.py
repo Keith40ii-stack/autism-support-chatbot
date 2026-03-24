@@ -147,7 +147,7 @@ def render_splash_video_with_balloons(video_path: str):
     </div>
     """
 
-    components.html(html, height=520)
+    components.html(html, height=660)
 
 def interpret_child_message(text: str):
     lowered = text.lower().strip()
@@ -252,10 +252,11 @@ st.markdown("""
     position: relative;
     width: 100%;
     max-width: 760px;
+    height: 620px;
     margin: 0 auto 1rem auto;
-    height: 500px;
     overflow: hidden;
     border-radius: 24px;
+    background: transparent;
 }
 
 .splash-video {
@@ -263,9 +264,8 @@ st.markdown("""
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     z-index: 1;
-    border-radius: 24px;
     background: transparent;
 }
 
@@ -279,11 +279,11 @@ st.markdown("""
 
 .splash-balloon {
     position: absolute;
-    bottom: -150px;
-    width: 10px;
-    height: 130px;
+    bottom: -180px;
+    width: 120px;
+    height: 150px;
     border-radius: 50% 50% 45% 45%;
-    opacity: 0.38;
+    opacity: 0.42;
     animation: floatUp linear infinite;
     filter: blur(0.2px);
 }
@@ -292,20 +292,20 @@ st.markdown("""
     content: "";
     position: absolute;
     left: 50%;
-    top: 105px;
+    top: 140px;
     width: 2px;
-    height: 75px;
+    height: 90px;
     background: rgba(120,140,160,0.22);
     transform: translateX(-50%);
 }
 
-.sb1 { left: 3%;  background: #8fd3ff; animation-duration: 20s; }
-.sb2 { left: 16%; background: #ffd8e8; animation-duration: 24s; }
-.sb3 { left: 30%; background: #ffe49f; animation-duration: 22s; }
+.sb1 { left: 2%;  background: #8fd3ff; animation-duration: 20s; }
+.sb2 { left: 14%; background: #ffd8e8; animation-duration: 24s; }
+.sb3 { left: 28%; background: #ffe49f; animation-duration: 22s; }
 .sb4 { left: 46%; background: #bde7c8; animation-duration: 26s; }
-.sb5 { left: 64%; background: #cfc8ff; animation-duration: 21s; }
+.sb5 { left: 66%; background: #cfc8ff; animation-duration: 21s; }
 .sb6 { left: 82%; background: #ffcfb3; animation-duration: 25s; }
-
+            
 @keyframes floatUp {
     0%   { transform: translateY(0) translateX(0px); opacity: 0; }
     10%  { opacity: 0.22; }
@@ -481,38 +481,33 @@ st.markdown("""
 /* Home bike animation */
 .jayden-stage {
     position: relative;
-    height: 190px;
+    height: 320px;
     margin-bottom: 1rem;
-    overflow: hidden;
-}
-
-.jayden-ground {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 28px;
-    height: 6px;
-    background: linear-gradient(90deg, rgba(180,220,240,0.2), rgba(120,190,220,0.45), rgba(180,220,240,0.2));
-    border-radius: 999px;
+    overflow: visible;
 }
 
 .jayden-rider {
     position: absolute;
-    bottom: 20px;
-    left: -180px;
+    bottom: 30px;
+    left: -220px;
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: flex-end;
+    gap: 14px;
     animation:
         rideIn 4.6s ease-out 0.2s forwards,
         gentleBob 2.2s ease-in-out 4.9s infinite;
 }
 
-.jayden-avatar-wrap {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.jayden-avatar {
+    width: 240px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    animation: peekForward 7s ease-in-out 6s infinite;
+    transform-origin: center center;
 }
 
 .jayden-avatar {
@@ -791,16 +786,7 @@ st.markdown(
 )# --------------------------------------------------
 # Splash screen
 # --------------------------------------------------
-st.markdown("""
-<div class="splash-bg">
-    <div class="splash-balloon sb1"></div>
-    <div class="splash-balloon sb2"></div>
-    <div class="splash-balloon sb3"></div>
-    <div class="splash-balloon sb4"></div>
-    <div class="splash-balloon sb5"></div>
-    <div class="splash-balloon sb6"></div>
-</div>
-""", unsafe_allow_html=True)
+
 # --------------------------------------------------
 # Splash screen (Video Intro)
 # --------------------------------------------------
