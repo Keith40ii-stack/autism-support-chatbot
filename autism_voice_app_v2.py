@@ -256,7 +256,7 @@ st.markdown("""
     margin: 0 auto 1rem auto;
     overflow: hidden;
     border-radius: 24px;
-    background: transparent;
+    background: linear-gradient(180deg, #dff3ff, #f4fbff);
 }
 
 .splash-video {
@@ -264,11 +264,10 @@ st.markdown("""
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: contain;   /* 🔥 THIS FIXES THE CUT OFF */
     z-index: 1;
     background: transparent;
 }
-
 .splash-bg {
     position: absolute;
     inset: 0;
