@@ -625,10 +625,24 @@ section.main > div {
     98%           { transform: rotate(0deg); }
 }
 /* 🎈 Splash balloons behind video */
+/* 🎈 Splash balloons in front of video */
+.splash-scene {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.splash-video-wrap {
+    position: relative;
+    z-index: 1;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
 .splash-bg {
-    position: fixed;
+    position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 3;
     pointer-events: none;
     overflow: hidden;
 }
@@ -636,10 +650,10 @@ section.main > div {
 .splash-balloon {
     position: absolute;
     bottom: -150px;
-    width: 80px;
-    height: 100px;
+    width: 90px;
+    height: 110px;
     border-radius: 50% 50% 45% 45%;
-    opacity: 0.18;
+    opacity: 0.28;
     animation: floatUp linear infinite;
 }
 
@@ -760,16 +774,33 @@ st.markdown("""
 # Splash screen (Video Intro)
 # --------------------------------------------------
 if st.session_state.show_splash:
-   
+
     import os
     video_path = os.path.join(os.getcwd(), "jayden_intro.mp4")
+
+    # 🎈 Balloons + Video Layer
+    st.markdown("""
+    <div class="splash-scene">
+        <div class="splash-bg">
+            <div class="splash-balloon sb1"></div>
+            <div class="splash-balloon sb2"></div>
+            <div class="splash-balloon sb3"></div>
+            <div class="splash-balloon sb4"></div>
+            <div class="splash-balloon sb5"></div>
+            <div class="splash-balloon sb6"></div>
+        </div>
+        <div class="splash-video-wrap">
+    """, unsafe_allow_html=True)
 
     if os.path.exists(video_path):
         st.video(video_path)
     else:
         st.error("Video not found")
 
-    if st.button("🌈 Start My Calm Journey"):
+    st.markdown("</div></div>", unsafe_allow_html=True)
+
+    # 🚀 Start Button
+    if st.button("🌈 Start My Calm Journey", use_container_width=True):
         st.session_state.show_splash = False
         st.rerun()
 
