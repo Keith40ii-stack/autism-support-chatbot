@@ -121,6 +121,33 @@ def transcribe_audio(audio_file):
     except Exception:
         return "I had trouble understanding that recording."
 
+def render_splash_video_with_balloons(video_path: str):
+    try:
+        with open(video_path, "rb") as f:
+            video_b64 = base64.b64encode(f.read()).decode()
+    except FileNotFoundError:
+        st.error("Video not found")
+        return
+
+    html = f"""
+    <div class="splash-scene">
+        <video class="splash-video" controls autoplay playsinline>
+            <source src="data:video/mp4;base64,{video_b64}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <div class="splash-bg">
+            <div class="splash-balloon sb1"></div>
+            <div class="splash-balloon sb2"></div>
+            <div class="splash-balloon sb3"></div>
+            <div class="splash-balloon sb4"></div>
+            <div class="splash-balloon sb5"></div>
+            <div class="splash-balloon sb6"></div>
+        </div>
+    </div>
+    """
+
+    components.html(html, height=520)
 
 def interpret_child_message(text: str):
     lowered = text.lower().strip()
@@ -221,59 +248,63 @@ def render_jayden_bike_intro(avatar_base64=None):
 # --------------------------------------------------
 st.markdown("""
 <style>
-.stApp {
-    background: linear-gradient(180deg, #dff3ff 0%, #edf9ff 45%, #f8fdff 100%);
+.splash-scene {
+    position: relative;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto 1rem auto;
+    height: 500px;
     overflow: hidden;
-    color: #163240;
+    border-radius: 24px;
 }
 
-[data-testid="stHeader"] {
-    background: rgba(0,0,0,0);
-}
-
-section.main > div {
-    padding-top: 1rem;
-}
-
-.balloon-bg {
-    position: fixed;
+.splash-video {
+    position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    border-radius: 24px;
+    background: transparent;
+}
+
+.splash-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
     pointer-events: none;
-    z-index: 0;
     overflow: hidden;
 }
 
-.balloon {
+.splash-balloon {
     position: absolute;
     bottom: -150px;
-    width: 74px;
-    height: 96px;
+    width: 10px;
+    height: 130px;
     border-radius: 50% 50% 45% 45%;
-    opacity: 0.20;
-    animation-name: floatUp;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
+    opacity: 0.38;
+    animation: floatUp linear infinite;
     filter: blur(0.2px);
 }
 
-.balloon::after {
+.splash-balloon::after {
     content: "";
     position: absolute;
     left: 50%;
-    top: 94px;
+    top: 105px;
     width: 2px;
-    height: 72px;
-    background: rgba(110, 130, 145, 0.22);
+    height: 75px;
+    background: rgba(120,140,160,0.22);
     transform: translateX(-50%);
 }
 
-.b1 { left: 5%;  background: #8fd3ff; animation-duration: 19s; animation-delay: 0s; }
-.b2 { left: 16%; background: #ffd8e8; animation-duration: 24s; animation-delay: 3s; }
-.b3 { left: 29%; background: #ffe49f; animation-duration: 22s; animation-delay: 1s; }
-.b4 { left: 43%; background: #bde7c8; animation-duration: 25s; animation-delay: 5s; }
-.b5 { left: 58%; background: #cfc8ff; animation-duration: 20s; animation-delay: 2s; }
-.b6 { left: 74%; background: #ffcfb3; animation-duration: 26s; animation-delay: 6s; }
-.b7 { left: 89%; background: #aee6ff; animation-duration: 23s; animation-delay: 4s; }
+.sb1 { left: 3%;  background: #8fd3ff; animation-duration: 20s; }
+.sb2 { left: 16%; background: #ffd8e8; animation-duration: 24s; }
+.sb3 { left: 30%; background: #ffe49f; animation-duration: 22s; }
+.sb4 { left: 46%; background: #bde7c8; animation-duration: 26s; }
+.sb5 { left: 64%; background: #cfc8ff; animation-duration: 21s; }
+.sb6 { left: 82%; background: #ffcfb3; animation-duration: 25s; }
 
 @keyframes floatUp {
     0%   { transform: translateY(0) translateX(0px); opacity: 0; }
@@ -774,32 +805,9 @@ st.markdown("""
 # Splash screen (Video Intro)
 # --------------------------------------------------
 if st.session_state.show_splash:
-
-    import os
     video_path = os.path.join(os.getcwd(), "jayden_intro.mp4")
+    render_splash_video_with_balloons(video_path)
 
-    # 🎈 Balloons + Video Layer
-    st.markdown("""
-    <div class="splash-scene">
-        <div class="splash-bg">
-            <div class="splash-balloon sb1"></div>
-            <div class="splash-balloon sb2"></div>
-            <div class="splash-balloon sb3"></div>
-            <div class="splash-balloon sb4"></div>
-            <div class="splash-balloon sb5"></div>
-            <div class="splash-balloon sb6"></div>
-        </div>
-        <div class="splash-video-wrap">
-    """, unsafe_allow_html=True)
-
-    if os.path.exists(video_path):
-        st.video(video_path)
-    else:
-        st.error("Video not found")
-
-    st.markdown("</div></div>", unsafe_allow_html=True)
-
-    # 🚀 Start Button
     if st.button("🌈 Start My Calm Journey", use_container_width=True):
         st.session_state.show_splash = False
         st.rerun()
