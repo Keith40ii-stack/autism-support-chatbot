@@ -81,7 +81,27 @@ def speak_text(text: str):
     </script>
     """
     components.html(js_code, height=0)
+def play_jayden_talking(frame_holder, text=None):
+    frames = [
+        "jayden_idle.png",
+        "jayden_talk_1.png",
+        "jayden_talk_2.png",
+        "jayden_talk_3.png",
+        "jayden_talk_2.png",
+        "jayden_talk_1.png",
+        "jayden_idle.png"
+    ]
 
+    # Show the mouth movement first so it's obvious
+    for _ in range(3):
+        for frame in frames:
+            frame_holder.image(frame, width=620)
+            time.sleep(0.35)
+
+    frame_holder.image("jayden_idle.png", width=620)
+
+    if text:
+        speak_text(text)
 
 def transcribe_audio(audio_file):
     try:
@@ -393,13 +413,13 @@ section.main > div {
 }
 
 .splash-avatar {
-    width: 150px;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 6px solid rgba(255,255,255,0.95);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
-    background: white;
+    width: 220px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
 }
 
 .splash-wave {
@@ -465,17 +485,17 @@ section.main > div {
 }
 
 .jayden-avatar {
-    width: 88px;
-    height: 88px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 4px solid rgba(255,255,255,0.95);
-    box-shadow: 0 10px 22px rgba(0,0,0,0.10);
-    background: white;
+    width: 180px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
     animation: peekForward 7s ease-in-out 6s infinite;
     transform-origin: center center;
 }
-
+            
 .jayden-fallback-avatar {
     display: flex;
     align-items: center;
@@ -675,90 +695,40 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 AVATAR_FILE = os.path.join(APP_DIR, "jayden_avatar.png")
 avatar_base64 = get_base64_image(AVATAR_FILE)
 
-title_col, avatar_col = st.columns([4, 1])
+title_col, avatar_col = st.columns([1, 0.01])
 
 with title_col:
     st.markdown("<div class='app-brand'>🎈 Jayden’s Calm Journey</div>", unsafe_allow_html=True)
     st.markdown("<div class='app-subbrand'>Autism Support Chatbot</div>", unsafe_allow_html=True)
 
 with avatar_col:
-    if avatar_base64:
-        st.markdown(
-            f"""
-            <div style="display:flex; justify-content:center; align-items:center; margin-top:6px;">
-                <img src="data:image/png;base64,{avatar_base64}"
-                     style="width:95px; height:95px; object-fit:cover; border-radius:50%;
-                            border:4px solid rgba(255,255,255,0.9);
-                            box-shadow:0 8px 18px rgba(0,0,0,0.10);" />
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown("<div style='font-size:3rem; text-align:center; margin-top:8px;'>🎈</div>", unsafe_allow_html=True)
+    st.empty()
 
 st.markdown(
     "<div class='app-caption'>A gentle space to help children feel calm, safe, and understood.</div>",
     unsafe_allow_html=True
-)
-
-
-# --------------------------------------------------
+)# --------------------------------------------------
 # Splash screen
 # --------------------------------------------------
+# --------------------------------------------------
+# Splash screen (Video Intro)
+# --------------------------------------------------
 if st.session_state.show_splash:
-    st.markdown("""
-    <div class="splash-wrap">
-        <div class="splash-title">🎈 Jayden’s Calm Journey</div>
-        <div class="splash-subtitle">Autism Support Chatbot</div>
-        <div class="splash-caption">A gentle space to help children feel calm, safe, and understood.</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.write("DEBUG: Splash is running")  # optional
 
-    if avatar_base64:
-        st.markdown(
-            f"""
-            <div style="display:flex; justify-content:center;">
-                <div class="splash-avatar-wrap">
-                    <img src="data:image/png;base64,{avatar_base64}" class="splash-avatar" />
-                    <div class="splash-wave">👋</div>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    import os
+    video_path = os.path.join(os.getcwd(), "jayden_intro.mp4")
+
+    if os.path.exists(video_path):
+        st.video(video_path)
     else:
-        st.markdown("""
-        <div style="display:flex; justify-content:center;">
-            <div class="splash-avatar-wrap">
-                <div class="splash-avatar" style="display:flex; align-items:center; justify-content:center; font-size:3rem;">🎈</div>
-                <div class="splash-wave">👋</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.error("Video not found")
 
-    st.markdown("""
-    <div class="splash-card">
-        <div class="card-title">Hi, I’m Jayden 👋</div>
-        <div class="card-text">
-            I’m here to help you use your words, feel calm, and take one small step at a time.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if not st.session_state.splash_started:
-        if st.button("✨ Tap to Start with Jayden", use_container_width=True):
-            start_splash()
-    else:
-        st.success("Jayden is welcoming you...")
-        if st.button("🌈 Start My Calm Journey", use_container_width=True):
-            st.session_state.show_splash = False
-            st.session_state.splash_started = False
-            st.rerun()
+    if st.button("🌈 Start My Calm Journey"):
+        st.session_state.show_splash = False
+        st.rerun()
 
     st.stop()
-
-
 # --------------------------------------------------
 # Screen router
 # --------------------------------------------------
@@ -773,6 +743,10 @@ if st.button("🔊 Test Voice Output"):
 # Home
 # --------------------------------------------------
 if screen == "home":
+
+    if st.button("Test Voice Only"):
+        speak_text("Hi friend, I’m Jayden.")
+    
     render_jayden_bike_intro(avatar_base64)
 
     st.markdown("""
@@ -983,21 +957,37 @@ elif screen == "talking":
     </div>
     """, unsafe_allow_html=True)
 
+    jayden_frame = st.empty()
+    jayden_frame.image("jayden_idle.png", width=620)
+
     col1, col2 = st.columns(2)
 
     with col1:
         if st.button("👋 Hello", use_container_width=True):
             st.success("Nice job saying hello.")
-            speak_text("Nice job saying hello.")
+            play_jayden_talking(jayden_frame, "Nice job saying hello.")
 
     with col2:
         if st.button("🙂 Hi", use_container_width=True):
             st.success("Great greeting.")
-            speak_text("Great greeting.")
+            play_jayden_talking(jayden_frame, "Great greeting.")
+
+    if st.button("🧪 Test Mouth Frames", use_container_width=True):
+        for frame in [
+            "jayden_idle.png",
+            "jayden_talk_1.png",
+            "jayden_talk_2.png",
+            "jayden_talk_3.png",
+            "jayden_talk_2.png",
+            "jayden_talk_1.png",
+            "jayden_idle.png"
+        ]:
+            jayden_frame.image(frame, width=620)
+            time.sleep(1.0)
 
     if st.button("🔁 Try Again", use_container_width=True):
         st.info("Let’s practice again.")
-        speak_text("Let’s practice again. Say hello.")
+        play_jayden_talking(jayden_frame, "Let’s practice again. Say hello.")
 
     st.divider()
 
@@ -1019,10 +1009,7 @@ elif screen == "talking":
 
             response = interpret_child_message(text)
             st.success(response)
-            speak_text(response)
-
-            if any(word in text.lower() for word in ["angry", "sad", "scared", "break", "upset", "worried"]):
-                st.info("You can also use Calm Down for breathing support.")
+            play_jayden_talking(jayden_frame, response)
 
     if st.button("🏠 Home", use_container_width=True):
         go("home")
