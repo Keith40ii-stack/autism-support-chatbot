@@ -147,7 +147,7 @@ def render_splash_video_with_balloons(video_path: str):
     </div>
     """
 
-    components.html(html, height=1200)
+    components.html(html, height=1350)
 
 def interpret_child_message(text: str):
     lowered = text.lower().strip()
@@ -252,7 +252,7 @@ st.markdown("""
     position: relative;
     width: 100%;
     max-width: 760px;
-    min-height: 1100px;
+    min-height: 1250px;
     margin: 0 auto 1rem auto;
     overflow: visible;
     border-radius: 24px;
