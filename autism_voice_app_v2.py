@@ -147,7 +147,7 @@ def render_splash_video_with_balloons(video_path: str):
     </div>
     """
 
-    components.html(html, height=660)
+    components.html(html, height=760)
 
 def interpret_child_message(text: str):
     lowered = text.lower().strip()
@@ -252,22 +252,25 @@ st.markdown("""
     position: relative;
     width: 100%;
     max-width: 760px;
-    height: 620px;
     margin: 0 auto 1rem auto;
-    overflow: hidden;
+    min-height: 720px;
+    overflow: visible;
     border-radius: 24px;
-    background: linear-gradient(180deg, #dff3ff, #f4fbff);
+    background: transparent;
 }
 
 .splash-video {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: contain;   /* 🔥 THIS FIXES THE CUT OFF */
+    height: auto;
+    max-height: 700px;
+    object-fit: contain;
     z-index: 1;
     background: transparent;
+    border-radius: 24px;
 }
+
 .splash-bg {
     position: absolute;
     inset: 0;
